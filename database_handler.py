@@ -35,4 +35,4 @@ class DatabaseHandler:
 
 if __name__ == '__main__':
     db_handler = DatabaseHandler()
-    # db_handler._create_database()
+    db_handler._create_database()
