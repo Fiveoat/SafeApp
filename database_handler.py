@@ -9,8 +9,7 @@ db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind
 class DatabaseHandler:
     def __init__(self):
         self.engine = create_engine('sqlite:///Files/data.sqlite')
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
+        self.session = sessionmaker(bind=self.engine)()
 
     def query(self, sql_statement):
         return [x for x in self.engine.execute(sql_statement)]
@@ -23,16 +22,10 @@ class DatabaseHandler:
         except Exception:
             return False
 
-    def insert(self):
-        pass
-
-    def delete(self):
-        pass
-
     def _create_database(self):
         Base.metadata.create_all(bind=self.engine)
 
-    def wipe_tables(self):
+    def _wipe_tables(self):
         tables = ['users', 'activities', 'contacts', 'user_activities', 'user_contacts']
         [self.commit(f"DELETE FROM {table}") for table in tables]
 
@@ -42,4 +35,4 @@ class DatabaseHandler:
 
 if __name__ == '__main__':
     db_handler = DatabaseHandler()
-    db_handler.wipe_tables()
+    # db_handler._create_database()
