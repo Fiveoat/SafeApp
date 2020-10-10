@@ -47,8 +47,7 @@ class CreateUser(graphene.Mutation):
 
     @classmethod
     def mutate(cls, _, args):
-        user = UsersModel(first=args.get('name'), email=args.get('email'), last=args.get('username'),
-                          user_id=args.get('user_id'))
+        user = UsersModel(email=args.get('email'), user_id=args.get('user_id'))
         db_session.add(user)
         db_session.commit()
         ok = True
@@ -77,16 +76,16 @@ class UpdateUsername(graphene.Mutation):
 
 class Query(graphene.ObjectType):
     node = relay.Node.Field()
-    user = SQLAlchemyConnectionField(Users)
-    find_user = graphene.Field(lambda: Users, user_id=graphene.Int())
     all_users = SQLAlchemyConnectionField(Users)
-    activities = SQLAlchemyConnectionField(Activities)
-    find_contacts = graphene.Field(lambda: Contacts, symbol=graphene.String())
+    all_activities = SQLAlchemyConnectionField(Activities)
     all_contacts = SQLAlchemyConnectionField(Contacts)
+    # NOT SURE HOW THESE WORK
+    find_user = graphene.Field(lambda: Users, user_id=graphene.Int())
+    find_contacts = graphene.Field(lambda: Contacts, contact_id=graphene.Int())
+    find_activity = graphene.Field(lambda: Activities, activity_id=graphene.Int())
 
     @staticmethod
     def resolve_find_user(args, context):
-        print(args)
         query = Users.get_query(context)
         user_id = args.get('user_id')
         # you can also use and_ with filter() eg: filter(and_(param1, param2)).first()
@@ -95,6 +94,7 @@ class Query(graphene.ObjectType):
     @staticmethod
     def resolve_find_contact(args, context):
         print(args)
+        print(context)
         query = Contacts.get_query(context)
         contact_id = args.get('contact_id')
         return query.filter(ContactsModel.contact_id == contact_id).first()
@@ -105,5 +105,5 @@ class Mutations(graphene.ObjectType):
     change_username = UpdateUsername.Field()
 
 
-schema = graphene.Schema(query=Query, mutation=Mutations,
-                         types=[Users, Activities, Contacts, UserContacts, UserActivities])
+schema = graphene.Schema(query=Query, types=[Users, Activities, Contacts, UserContacts, UserActivities],
+                         mutation=Mutations)

@@ -7,10 +7,6 @@ class DummyManager(DatabaseHandler):
     def __init__(self):
         super().__init__()
 
-    def insert(self, data):
-        self.session.add(data)
-        self.session.commit()
-
     def create_user(self, first, last, email):
         user = Users()
         user.first_name = first
@@ -31,8 +27,8 @@ class DummyManager(DatabaseHandler):
         activity.contact_method = contact_method
         activity.contact_id = 1
         activity.tracking = True
-        activity.start_datetime = datetime.utcnow()
-        activity.end_datetime = datetime.now()
+        activity.start_datetime = datetime.now()
+        activity.end_datetime = datetime.utcnow()
         activity.contact_alerted = False
         activity.is_active = True
         activity.label = label
@@ -43,7 +39,7 @@ if __name__ == '__main__':
     manager = DummyManager()
     last_names = ["Smith", "Johnson", "Hansen", "Brown", "Jones", "Miller", "Davis"]
     first_names = ["James", "Mary", "John", "Robert", "William", "David", "Daniel", "Charles", "Paul"]
-    contact_methods = ["Email", "Text", "Messenger"]
+    contact_methods = ["email", "text", "messenger"]
     labels = ["Hike", "Date", "Lunch", "Backcounty Skiing", "Rock Climbing", "In Laws"]
     numbers = ["801.445.3903", "801.232.2344", "801.234.3985", "208.484.4840"]
     created = 0

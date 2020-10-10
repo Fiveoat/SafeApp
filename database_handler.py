@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 
 engine = create_engine('sqlite:///Files/data.sqlite')
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+Base.query = db_session.query_property()
 
 
 class DatabaseHandler:
@@ -21,6 +22,10 @@ class DatabaseHandler:
             return True
         except Exception:
             return False
+
+    def insert(self, data):
+        self.session.add(data)
+        self.session.commit()
 
     def _create_database(self):
         Base.metadata.create_all(bind=self.engine)
