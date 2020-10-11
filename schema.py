@@ -35,43 +35,54 @@ class UserContacts(SQLAlchemyObjectType):
         interfaces = (relay.Node,)
 
 
+# NOT SURE HOW THESE WORK
 class CreateUser(graphene.Mutation):
     class Input:
         user_id = graphene.Int()
-        name = graphene.String()
+        first_name = graphene.String()
         email = graphene.String()
-        last = graphene.String()
-
+        last_name = graphene.String()
+        last_known_location = graphene.String()
     ok = graphene.Boolean()
     user = graphene.Field(Users)
 
-    @classmethod
-    def mutate(cls, _, args):
-        user = UsersModel(email=args.get('email'), user_id=args.get('user_id'))
+    @staticmethod
+    def mutate(___, args, _, __):
+        user = UsersModel()
+        user.first_name = args.get("first_name")
+        user.last_name = args.get("last_name")
+        user.email = args.get("email")
+        user.last_known_location = args.get("last_known_location")
         db_session.add(user)
         db_session.commit()
         ok = True
         return CreateUser(user=user, ok=ok)
 
 
-class UpdateUsername(graphene.Mutation):
+class CreateActivity(graphene.Mutation):
     class Input:
-        first = graphene.String()
-        email = graphene.String()
-
+        contact_id = graphene.String()
+        label = graphene.String()
+        tracking = graphene.Boolean()
+        contact_alerted = graphene.Boolean()
+        is_active = graphene.Boolean()
     ok = graphene.Boolean()
-    user = graphene.Field(Users)
+    activity = graphene.Field(Activities)
 
-    @classmethod
-    def mutate(cls, _, args, context):
-        query = Users.get_query(context)
-        email = args.get('email')
-        username = args.get('username')
-        user = query.filter(UsersModel.email == email).first()
-        user.username = username
+    @staticmethod
+    def mutate(___, args, _, __):
+        activity = ActivitiesModel()
+        activity.contact_id = args.get("contact_id")
+        activity.label = args.get("label")
+        activity.tracking = args.get("tracking", False)
+        activity.start_datetime = args.get("start_datetime")
+        activity.end_datetime = args.get("end_datetime")
+        activity.contact_alerted = args.get("contact_alerted", False)
+        activity.is_active = args.get("is_active", True)
+        db_session.add(activity)
         db_session.commit()
         ok = True
-        return UpdateUsername(user=user, ok=ok)
+        return CreateActivity(activity=activity, ok=ok)
 
 
 class Query(graphene.ObjectType):
@@ -84,6 +95,7 @@ class Query(graphene.ObjectType):
     find_contacts = graphene.Field(lambda: Contacts, contact_id=graphene.Int())
     find_activity = graphene.Field(lambda: Activities, activity_id=graphene.Int())
 
+    # NOT SURE HOW THESE WORK
     @staticmethod
     def resolve_find_user(args, context):
         query = Users.get_query(context)
@@ -100,10 +112,10 @@ class Query(graphene.ObjectType):
         return query.filter(ContactsModel.contact_id == contact_id).first()
 
 
-class Mutations(graphene.ObjectType):
+class MyMutations(graphene.ObjectType):
     create_user = CreateUser.Field()
-    change_username = UpdateUsername.Field()
+    create_activity = CreateActivity.Field()
 
 
 schema = graphene.Schema(query=Query, types=[Users, Activities, Contacts, UserContacts, UserActivities],
-                         mutation=Mutations)
+                         mutation=MyMutations)
